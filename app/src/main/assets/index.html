@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MR AABID – Instagram Downloader Tool</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+--neon:#00f5d4;--neon2:#7b2ff7;--neon3:#ff2d6b;
+--bg:#060812;--bg2:#0b0f1e;--bg3:#0f1428;
+--glass:rgba(255,255,255,0.04);--glass2:rgba(255,255,255,0.06);
+--border:rgba(0,245,212,0.15);--border2:rgba(123,47,247,0.2);
+--text:#e8eaf6;--text2:#8892b0;
+--font-head:'Syne',sans-serif;--font-body:'DM Sans',sans-serif;
+--ease:cubic-bezier(0.16,1,0.3,1);--ease2:cubic-bezier(0.34,1.56,0.64,1);
+}
+html{overflow-x:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);overflow-x:hidden;min-height:100vh;line-height:1.6}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--neon2);border-radius:2px}
+
+/* ANIMATED BG */
+.bg-layer{position:fixed;inset:0;pointer-events:none;z-index:0}
+.bg-grad{position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 20% 20%,rgba(123,47,247,0.12) 0%,transparent 60%),radial-gradient(ellipse 50% 60% at 80% 80%,rgba(0,245,212,0.08) 0%,transparent 60%);animation:bgShift 10s ease-in-out infinite alternate}
+@keyframes bgShift{0%{opacity:0.8;transform:scale(1)}100%{opacity:1;transform:scale(1.05)}}
+.bg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,245,212,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,212,0.03) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse at center,black 30%,transparent 80%)}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:1;opacity:0.3}
+
+/* NAVBAR */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 20px 0 24px;border-bottom:1px solid rgba(255,255,255,0.05);background:rgba(6,8,18,0.8);backdrop-filter:blur(20px)}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--neon2),var(--neon));border-radius:8px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 16px rgba(123,47,247,0.5)}
+.nav-logo-icon svg{width:18px;height:18px}
+.nav-logo-text{font-family:var(--font-head);font-weight:800;font-size:1rem;letter-spacing:0.05em;background:linear-gradient(90deg,var(--neon),var(--neon2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.menu-btn{width:44px;height:44px;background:var(--glass2);border:1px solid var(--border);border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.2s,box-shadow 0.2s;flex-shrink:0;position:relative;z-index:201}
+.menu-btn:hover{background:rgba(0,245,212,0.1);box-shadow:0 0 14px rgba(0,245,212,0.2)}
+.menu-btn svg{width:20px;height:20px}
+
+/* MAIN */
+main{position:relative;z-index:2;padding:80px 4% 40px;max-width:780px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
+
+/* TOP HEADER */
+.app-header{text-align:center;display:flex;flex-direction:column;gap:6px;animation:headerIn 0.9s var(--ease) both}
+@keyframes headerIn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+.app-tag{display:inline-flex;align-items:center;gap:7px;font-size:0.65rem;font-weight:700;letter-spacing:0.18em;color:var(--neon);text-transform:uppercase;padding:4px 12px;background:rgba(0,245,212,0.07);border:1px solid rgba(0,245,212,0.18);border-radius:100px;margin:0 auto 4px;width:fit-content}
+.app-tag-dot{width:5px;height:5px;background:var(--neon);border-radius:50%;animation:pulse2 2s ease-in-out infinite}
+@keyframes pulse2{0%,100%{box-shadow:0 0 0 0 rgba(0,245,212,0.5)}50%{box-shadow:0 0 0 5px rgba(0,245,212,0)}}
+.app-title{font-family:var(--font-head);font-size:clamp(1.5rem,4vw,2.4rem);font-weight:800;letter-spacing:-0.025em;line-height:1.1}
+.app-title span{background:linear-gradient(135deg,var(--neon),var(--neon2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.app-sub{font-size:0.85rem;color:var(--text2)}
+
+/* MAIN TOOL PANEL */
+.tool-panel{background:linear-gradient(135deg,rgba(11,15,30,0.9),rgba(15,20,40,0.95));border:1px solid rgba(0,245,212,0.12);border-radius:20px;padding:28px 24px;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:20px;animation:panelIn 1s var(--ease) 0.2s both;box-shadow:0 0 60px rgba(0,0,0,0.5),0 0 1px rgba(0,245,212,0.1) inset}
+@keyframes panelIn{from{opacity:0;transform:translateY(24px) scale(0.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+/* ANIMATED GLOW BORDER */
+.tool-panel::before{content:'';position:absolute;inset:-1px;border-radius:21px;background:linear-gradient(135deg,rgba(0,245,212,0.15),transparent 30%,rgba(123,47,247,0.15) 70%,transparent);pointer-events:none;animation:borderGlow 4s ease-in-out infinite alternate}
+@keyframes borderGlow{0%{opacity:0.5}100%{opacity:1}}
+.tool-panel::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,245,212,0.4),rgba(123,47,247,0.4),transparent)}
+/* SHIMMER */
+.tool-panel-shimmer{position:absolute;inset:0;border-radius:20px;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,0.025) 50%,transparent 60%);background-size:200% 100%;animation:shimmer 6s ease-in-out infinite;pointer-events:none}
+@keyframes shimmer{0%,100%{background-position:200% 0}50%{background-position:-200% 0}}
+
+/* INPUT ROW */
+.input-row{display:flex;gap:10px;align-items:stretch;flex-wrap:nowrap}
+.url-input{flex:1;min-width:0;padding:14px 18px;background:rgba(255,255,255,0.04);border:1px solid rgba(0,245,212,0.12);border-radius:12px;color:var(--text);font-family:var(--font-body);font-size:0.9rem;outline:none;transition:border-color 0.3s ease,box-shadow 0.3s ease;caret-color:var(--neon)}
+.url-input::placeholder{color:rgba(136,146,176,0.5)}
+.url-input:focus{border-color:rgba(0,245,212,0.4);box-shadow:0 0 0 3px rgba(0,245,212,0.07),0 0 20px rgba(0,245,212,0.06) inset}
+.fetch-btn{flex-shrink:0;padding:14px 22px;background:linear-gradient(135deg,var(--neon2),var(--neon3));color:#fff;font-family:var(--font-head);font-weight:700;font-size:0.85rem;letter-spacing:0.06em;border:none;border-radius:12px;cursor:pointer;position:relative;overflow:hidden;box-shadow:0 0 20px rgba(123,47,247,0.4);transition:transform 0.2s var(--ease2),box-shadow 0.2s ease;white-space:nowrap}
+.fetch-btn::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);transition:left 0.4s ease}
+.fetch-btn:hover::after{left:100%}
+.fetch-btn:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 0 30px rgba(123,47,247,0.6)}
+.fetch-btn:active{transform:translateY(1px) scale(0.98)}
+
+/* LOADER */
+.loader{display:none;justify-content:center;align-items:center;gap:10px;padding:16px 0;min-height:0}
+.loader.active{display:flex}
+.spinner{width:32px;height:32px;border-radius:50%;border:3px solid rgba(255,255,255,0.06);border-top-color:var(--neon);border-right-color:var(--neon2);animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-text{font-size:0.82rem;color:var(--text2)}
+
+/* ERROR BOX */
+.error-box{display:none;background:rgba(255,45,107,0.08);border:1px solid rgba(255,45,107,0.3);border-radius:12px;padding:14px 18px;font-size:0.85rem;color:#ff6b8a;animation:errorIn 0.4s var(--ease2)}
+.error-box.active{display:block}
+@keyframes errorIn{from{opacity:0;transform:translateY(-8px) scale(0.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+/* RESULT */
+.result-area{display:none;flex-direction:column;gap:14px}
+.result-area.active{display:flex;animation:resultIn 0.6s var(--ease) both}
+@keyframes resultIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.result-label{font-size:0.7rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--neon);display:flex;align-items:center;gap:7px}
+.result-label::before{content:'';width:16px;height:1px;background:var(--neon);display:inline-block}
+.media-wrap{border-radius:14px;overflow:hidden;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.06);position:relative}
+.media-wrap video,.media-wrap img{width:100%;height:auto;display:block;object-fit:contain;max-height:460px}
+.dl-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:14px 28px;background:linear-gradient(135deg,var(--neon2),var(--neon));color:#fff;font-family:var(--font-head);font-weight:700;font-size:0.9rem;letter-spacing:0.05em;border:none;border-radius:12px;cursor:pointer;position:relative;overflow:hidden;box-shadow:0 0 30px rgba(0,245,212,0.25);transition:transform 0.3s var(--ease2),box-shadow 0.3s ease;width:100%}
+.dl-btn::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent);transition:left 0.5s ease}
+.dl-btn:hover::after{left:100%}
+.dl-btn:hover{transform:translateY(-3px);box-shadow:0 0 45px rgba(0,245,212,0.35)}
+.dl-btn:active{transform:translateY(1px)}
+.dl-btn svg{width:18px;height:18px}
+
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.stat-item{background:var(--glass);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:14px 16px;text-align:center}
+.stat-val{font-family:var(--font-head);font-size:1.1rem;font-weight:800;background:linear-gradient(135deg,var(--neon),var(--neon2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-key{font-size:0.7rem;color:var(--text2);letter-spacing:0.08em;margin-top:2px}
+
+/* TIPS STRIP */
+.tips-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tip-item{background:var(--glass);border:1px solid rgba(255,255,255,0.05);border-radius:12px;padding:14px;display:flex;align-items:flex-start;gap:10px}
+.tip-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tip-text{font-size:0.75rem;color:var(--text2);line-height:1.5}
+.tip-text strong{color:var(--text);display:block;font-size:0.8rem;margin-bottom:2px}
+
+/* MODAL OVERLAY */
+.modal-overlay{position:fixed;inset:0;background:rgba(6,8,18,0.7);backdrop-filter:blur(10px);z-index:500;opacity:0;pointer-events:none;transition:opacity 0.3s ease;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:linear-gradient(135deg,rgba(11,15,30,0.98),rgba(15,20,40,0.98));border:1px solid rgba(0,245,212,0.15);border-radius:22px;padding:0;width:100%;max-width:360px;position:relative;overflow:hidden;transform:translateY(24px) scale(0.95);transition:transform 0.4s var(--ease2);box-shadow:0 0 80px rgba(0,0,0,0.8),0 0 1px rgba(0,245,212,0.1) inset}
+.modal-overlay.open .modal{transform:translateY(0) scale(1)}
+.modal::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--neon),var(--neon2),transparent)}
+.modal-header{padding:22px 22px 16px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-family:var(--font-head);font-size:1rem;font-weight:800;background:linear-gradient(135deg,var(--neon),var(--neon2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.modal-close{width:32px;height:32px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.2s}
+.modal-close:hover{background:rgba(255,45,107,0.15);border-color:rgba(255,45,107,0.3)}
+.modal-close svg{width:14px;height:14px;stroke:var(--text2);stroke-width:2;stroke-linecap:round}
+.modal-body{padding:16px 22px 22px;display:flex;flex-direction:column;gap:10px}
+.modal-link{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--glass);border:1px solid rgba(255,255,255,0.06);border-radius:14px;text-decoration:none;color:var(--text);transition:background 0.2s,border-color 0.2s,transform 0.2s var(--ease2);position:relative;overflow:hidden}
+.modal-link::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,245,212,0.05),transparent);opacity:0;transition:opacity 0.3s ease}
+.modal-link:hover::before{opacity:1}
+.modal-link:hover{background:rgba(0,245,212,0.07);border-color:rgba(0,245,212,0.2);transform:translateX(4px)}
+.modal-link-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.modal-link-info{flex:1;min-width:0}
+.modal-link-label{font-family:var(--font-head);font-size:0.85rem;font-weight:700}
+.modal-link-url{font-size:0.7rem;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.modal-link-arrow{width:16px;height:16px;stroke:var(--text2);flex-shrink:0;transition:transform 0.2s}
+.modal-link:hover .modal-link-arrow{transform:translate(3px,-3px)}
+
+@media(max-width:600px){
+  main{padding:72px 3% 32px;gap:18px}
+  .stats-row{grid-template-columns:repeat(3,1fr);gap:8px}
+  .stat-item{padding:10px 8px}
+  .stat-val{font-size:0.95rem}
+  .tips-strip{grid-template-columns:1fr}
+  .input-row{flex-direction:row;flex-wrap:nowrap}
+  .fetch-btn{padding:14px 14px;font-size:0.8rem}
+}
+
+/* HISTORY */
+.hist-btn{display:flex;align-items:center;gap:8px;padding:12px 18px;background:var(--glass);border:1px solid var(--border);border-radius:12px;color:var(--neon);font-family:var(--font-head);font-weight:700;font-size:0.82rem;letter-spacing:0.06em;cursor:pointer;width:100%;transition:background 0.2s,box-shadow 0.2s}
+.hist-btn:hover{background:rgba(0,245,212,0.08);box-shadow:0 0 14px rgba(0,245,212,0.15)}
+.hist-btn svg{width:18px;height:18px;flex-shrink:0}
+.hist-panel{display:none;flex-direction:column;gap:10px;animation:resultIn 0.4s var(--ease) both}
+.hist-panel.active{display:flex}
+.hist-empty{text-align:center;color:var(--text2);font-size:0.85rem;padding:20px 0}
+.hist-item{display:flex;align-items:center;gap:12px;background:var(--glass);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:12px 14px;cursor:pointer;transition:background 0.2s,border-color 0.2s}
+.hist-item:hover{background:rgba(0,245,212,0.06);border-color:rgba(0,245,212,0.2)}
+.hist-thumb{width:52px;height:52px;border-radius:8px;object-fit:cover;background:#111;flex-shrink:0}
+.hist-thumb-placeholder{width:52px;height:52px;border-radius:8px;background:rgba(123,47,247,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hist-info{flex:1;min-width:0}
+.hist-type{font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--neon2)}
+.hist-url{font-size:0.72rem;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.hist-time{font-size:0.68rem;color:var(--text2);margin-top:3px}
+.hist-actions{display:flex;gap:6px;flex-shrink:0}
+.hist-play-btn,.hist-dl-btn2{width:34px;height:34px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform 0.2s}
+.hist-play-btn{background:rgba(0,245,212,0.12)}
+.hist-play-btn:hover{background:rgba(0,245,212,0.22);transform:scale(1.08)}
+.hist-dl-btn2{background:rgba(123,47,247,0.15)}
+.hist-dl-btn2:hover{background:rgba(123,47,247,0.28);transform:scale(1.08)}
+.hist-play-btn svg,.hist-dl-btn2 svg{width:16px;height:16px}
+.hist-clear{display:inline-flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--neon3);background:rgba(255,45,107,0.07);border:1px solid rgba(255,45,107,0.2);border-radius:8px;padding:6px 12px;cursor:pointer;transition:background 0.2s;margin-left:auto}
+.hist-clear:hover{background:rgba(255,45,107,0.15)}
+.hist-header-row{display:flex;align-items:center;justify-content:space-between}
+.hist-title{font-size:0.7rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--neon);display:flex;align-items:center;gap:7px}
+.hist-title::before{content:'';width:16px;height:1px;background:var(--neon);display:inline-block}
+</style>
+</head>
+<body>
+
+
+<script src="https://www.highperformanceformat.com/79712bb1a11e9e5d651c4292fc43e88e/invoke.js"></script>
+
+<div class="bg-layer">
+  <div class="bg-grad"></div>
+  <div class="bg-grid"></div>
+</div>
+
+<!-- NAVBAR -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <div class="nav-logo-icon">
+      <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M9 2L14 7H11V13H7V7H4L9 2Z" fill="white" opacity="0.9"/>
+        <path d="M3 15H15" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+      </svg>
+    </div>
+    <span class="nav-logo-text">Mr Aabid</span>
+  </a>
+  <button class="menu-btn" id="menuBtn" aria-label="Developer menu">
+    <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="10" cy="4" r="1.8" fill="var(--neon)"/>
+      <circle cx="10" cy="10" r="1.8" fill="var(--neon)"/>
+      <circle cx="10" cy="16" r="1.8" fill="var(--neon)"/>
+    </svg>
+  </button>
+</nav>
+
+<!-- MAIN -->
+<main>
+  <div class="app-header">
+    <div class="app-tag"><span class="app-tag-dot"></span>Mr Aabid TOOL</div>
+    <h1 class="app-title"><span>Instagram</span> Downloader Tool</h1>
+    <p class="app-sub">Paste any Instagram reel, post or story link below</p>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-item">
+      <div class="stat-val">0.3s</div>
+      <div class="stat-key">AVG FETCH</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-val">4K</div>
+      <div class="stat-key">MAX QUALITY</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-val">FREE</div>
+      <div class="stat-key">ALWAYS</div>
+    </div>
+  </div>
+
+  <!-- TOOL PANEL -->
+  <div class="tool-panel">
+    <div class="tool-panel-shimmer"></div>
+    <div class="input-row">
+      <input type="url" class="url-input" id="urlInput" placeholder="https://www.instagram.com/reel/..." autocomplete="off" spellcheck="false">
+      <button class="fetch-btn" id="fetchBtn">FETCH</button>
+    </div>
+    <div class="loader" id="loader">
+      <div class="spinner"></div>
+      <span class="loader-text">Fetching media...</span>
+    </div>
+    <div class="error-box" id="errorBox"></div>
+    <div class="result-area" id="resultArea">
+      <div class="result-label">Media Preview</div>
+      <div class="media-wrap" id="mediaWrap"></div>
+      <button class="dl-btn" id="dlBtn">
+        <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 2v10M5 9l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M2 15h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        Download
+      </button>
+      <button class="dl-btn" id="hdBtn" style="background:linear-gradient(135deg,#f9a825,#ff6d00);margin-top:8px">
+        <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18">
+          <path d="M9 2v10M5 9l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M2 15h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        ⚡ HD Fast Download (Watch Ad)
+      </button>
+    </div>
+  </div>
+
+  <!-- TIPS -->
+  <div class="tips-strip">
+    <div class="tip-item">
+      <div class="tip-icon" style="background:rgba(0,245,212,0.1)">
+        <svg viewBox="0 0 18 18" fill="none" width="16" height="16" stroke="var(--neon)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 3v6l3 3"/><circle cx="9" cy="9" r="7"/>
+        </svg>
+      </div>
+      <div class="tip-text"><strong>Public Only</strong>Works on public Instagram accounts only</div>
+    </div>
+    <div class="tip-item">
+      <div class="tip-icon" style="background:rgba(123,47,247,0.12)">
+        <svg viewBox="0 0 18 18" fill="none" width="16" height="16" stroke="var(--neon2)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="4" width="14" height="11" rx="2"/><path d="M6 4V3a1 1 0 012 0v1M10 4V3a1 1 0 012 0v1"/>
+        </svg>
+      </div>
+      <div class="tip-text"><strong>Reels &amp; Posts</strong>Supports videos, photos and carousels</div>
+    </div>
+    <div class="tip-item">
+      <div class="tip-icon" style="background:rgba(255,45,107,0.1)">
+        <svg viewBox="0 0 18 18" fill="none" width="16" height="16" stroke="var(--neon3)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 2a7 7 0 100 14A7 7 0 009 2z"/><path d="M9 6v3l2 2"/>
+        </svg>
+      </div>
+      <div class="tip-text"><strong>No Watermark</strong>Clean downloads with original quality</div>
+    </div>
+  </div>
+
+  <!-- HISTORY TOGGLE -->
+  <button class="hist-btn" id="histBtn">
+    <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="9" cy="9" r="7"/><path d="M9 5v4l2.5 2.5"/>
+    </svg>
+    History
+  </button>
+
+  <!-- HISTORY PANEL -->
+  <div class="hist-panel" id="histPanel">
+    <div class="hist-header-row">
+      <div class="hist-title">Download History</div>
+      <button class="hist-clear" id="histClear">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5M3 4l1 9h8l1-9"/></svg>
+        Clear All
+      </button>
+    </div>
+    <div id="histList"></div>
+  </div>
+</main>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Meet the Developer</span>
+      <button class="modal-close" id="modalClose" aria-label="Close">
+        <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 2l10 10M12 2L2 12"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <a href="https://youtube.com/@thehackerxtrader" target="_blank" rel="noopener" class="modal-link">
+        <div class="modal-link-icon" style="background:rgba(255,0,0,0.12)">
+          <svg viewBox="0 0 24 24" fill="none" width="22" height="22" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22.5 6.5s-.28-1.97-1.13-2.84c-1.08-1.13-2.29-1.14-2.84-1.21C15.89 2.25 12 2.25 12 2.25s-3.89 0-6.53.2c-.55.07-1.76.08-2.84 1.21C1.78 4.53 1.5 6.5 1.5 6.5S1.22 8.8 1.22 11.1v2.16c0 2.3.28 4.6.28 4.6s.28 1.97 1.13 2.84c1.08 1.13 2.5 1.09 3.13 1.21C7.78 22 12 22 12 22s3.89 0 6.53-.2c.55-.07 1.76-.08 2.84-1.21.85-.87 1.13-2.84 1.13-2.84s.28-2.3.28-4.6V11.1c0-2.3-.28-4.6-.28-4.6z" stroke="#ff4444" stroke-width="1.5"/>
+            <path d="M10 15.5v-7l6 3.5-6 3.5z" fill="#ff4444"/>
+          </svg>
+        </div>
+        <div class="modal-link-info">
+          <div class="modal-link-label">YouTube (Main)</div>
+          <div class="modal-link-url">@thehackerxtrader</div>
+        </div>
+        <svg class="modal-link-arrow" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 13L13 3M13 3H6M13 3v7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+      <a href="https://youtube.com/@thehackerxtrader" target="_blank" rel="noopener" class="modal-link">
+        <div class="modal-link-icon" style="background:rgba(255,0,0,0.1)">
+          <svg viewBox="0 0 24 24" fill="none" width="22" height="22" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22.5 6.5s-.28-1.97-1.13-2.84c-1.08-1.13-2.29-1.14-2.84-1.21C15.89 2.25 12 2.25 12 2.25s-3.89 0-6.53.2c-.55.07-1.76.08-2.84 1.21C1.78 4.53 1.5 6.5 1.5 6.5S1.22 8.8 1.22 11.1v2.16c0 2.3.28 4.6.28 4.6s.28 1.97 1.13 2.84c1.08 1.13 2.5 1.09 3.13 1.21C7.78 22 12 22 12 22s3.89 0 6.53-.2c.55-.07 1.76-.08 2.84-1.21.85-.87 1.13-2.84 1.13-2.84s.28-2.3.28-4.6V11.1c0-2.3-.28-4.6-.28-4.6z" stroke="#ff6666" stroke-width="1.5"/>
+            <path d="M10 15.5v-7l6 3.5-6 3.5z" fill="#ff6666"/>
+          </svg>
+        </div>
+        <div class="modal-link-info">
+          <div class="modal-link-label">YouTube (Second)</div>
+          <div class="modal-link-url">@thehackerxtrader</div>
+        </div>
+        <svg class="modal-link-arrow" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 13L13 3M13 3H6M13 3v7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+      <a href="https://www.instagram.com/sutarboy302?igsh=bmxxcTdiZXlncmtr" target="_blank" rel="noopener" class="modal-link">
+        <div class="modal-link-icon" style="background:rgba(255,45,107,0.1)">
+          <svg viewBox="0 0 24 24" fill="none" width="22" height="22" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="20" height="20" rx="5" stroke="url(#igGrad)" stroke-width="1.8"/>
+            <circle cx="12" cy="12" r="5" stroke="url(#igGrad)" stroke-width="1.8"/>
+            <circle cx="17.5" cy="6.5" r="1.2" fill="url(#igGrad)"/>
+            <defs>
+              <linearGradient id="igGrad" x1="2" y1="22" x2="22" y2="2" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#f9a825"/>
+                <stop offset="40%" stop-color="#e91e8c"/>
+                <stop offset="100%" stop-color="#7b2ff7"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="modal-link-info">
+          <div class="modal-link-label">Instagram</div>
+          <div class="modal-link-url">@sutarboy302</div>
+        </div>
+        <svg class="modal-link-arrow" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 13L13 3M13 3H6M13 3v7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+const urlInput = document.getElementById('urlInput');
+const fetchBtn = document.getElementById('fetchBtn');
+const loader = document.getElementById('loader');
+const errorBox = document.getElementById('errorBox');
+const resultArea = document.getElementById('resultArea');
+const mediaWrap = document.getElementById('mediaWrap');
+const dlBtn = document.getElementById('dlBtn');
+const menuBtn = document.getElementById('menuBtn');
+const modalOverlay = document.getElementById('modalOverlay');
+const modalClose = document.getElementById('modalClose');
+
+let currentMediaUrl = '';
+let currentIsVideo = false;
+
+// MODAL
+menuBtn.addEventListener('click',()=>{
+  modalOverlay.classList.add('open');
+});
+modalClose.addEventListener('click',()=>{
+  modalOverlay.classList.remove('open');
+});
+modalOverlay.addEventListener('click',e=>{
+  if(e.target===modalOverlay) modalOverlay.classList.remove('open');
+});
+
+// SHOW/HIDE HELPERS
+function showLoader(){
+  loader.classList.add('active');
+  errorBox.classList.remove('active');
+  resultArea.classList.remove('active');
+  fetchBtn.disabled=true;
+  fetchBtn.style.opacity='0.6';
+}
+function hideLoader(){
+  loader.classList.remove('active');
+  fetchBtn.disabled=false;
+  fetchBtn.style.opacity='';
+}
+function showError(msg){
+  errorBox.textContent=msg;
+  errorBox.classList.add('active');
+  errorBox.style.animation='none';
+  void errorBox.offsetWidth;
+  errorBox.style.animation='';
+}
+function clearError(){
+  errorBox.classList.remove('active');
+}
+
+// FETCH
+fetchBtn.addEventListener('click',doFetch);
+urlInput.addEventListener('keydown',e=>{ if(e.key==='Enter') doFetch(); });
+
+async function doFetch(){
+  clearError();
+  const url = urlInput.value.trim();
+  if(!url){ showError('Please paste an Instagram URL first.'); return; }
+  if(!url.includes('instagram.com')){ showError('That does not look like a valid Instagram URL.'); return; }
+  showLoader();
+  try{
+    const apiUrl = 'https://instagram-api-production-ac8c.up.railway.app/igdl?url=' + encodeURIComponent(url);
+    const resp = await fetch(apiUrl, {mode:'cors'});
+    if(!resp.ok) throw new Error('API returned ' + resp.status);
+    const data = await resp.json();
+    processResult(data);
+  } catch(err){
+    hideLoader();
+    showError('Could not fetch media. Check the URL and try again.');
+  }
+}
+
+function extractMedia(data){
+  let mediaUrl = null;
+  let isVideo = false;
+  let thumb = null;
+
+  const tryUrl = (u)=>{
+    if(u && typeof u === 'string' && u.startsWith('http')) return u;
+    return null;
+  };
+
+  // API response: { url: { status: true, data: [{ url: "...", thumbnail: "..." }] } }
+  if(data.url && typeof data.url === 'object' && data.url.status && Array.isArray(data.url.data) && data.url.data.length > 0){
+    mediaUrl = tryUrl(data.url.data[0].url);
+    thumb = tryUrl(data.url.data[0].thumbnail);
+    isVideo = true;
+  }
+
+  return { mediaUrl, isVideo, thumb };
+}
+
+function processResult(data){
+  hideLoader();
+  const { mediaUrl, isVideo, thumb } = extractMedia(data);
+  if(!mediaUrl){
+    showError('No downloadable media found in the response.');
+    return;
+  }
+  currentMediaUrl = mediaUrl;
+  currentIsVideo = isVideo;
+
+  // Build preview
+  mediaWrap.innerHTML = '';
+  if(isVideo){
+    const vid = document.createElement('video');
+    vid.controls = true;
+    vid.playsInline = true;
+    vid.preload = 'metadata';
+    if(thumb) vid.poster = thumb;
+    const src = document.createElement('source');
+    src.src = mediaUrl;
+    vid.appendChild(src);
+    vid.onerror = ()=>{ vid.style.display='none'; fallbackImg(thumb||mediaUrl); };
+    mediaWrap.appendChild(vid);
+  } else {
+    const img = document.createElement('img');
+    img.src = mediaUrl;
+    img.alt = 'Instagram Media';
+    img.loading = 'lazy';
+    img.onerror = ()=>{ showError('Media loaded but could not preview. Download directly below.'); };
+    mediaWrap.appendChild(img);
+  }
+  resultArea.classList.add('active');
+  // Save to history
+  currentInstagramUrl = urlInput.value.trim();
+  addToHistory(currentInstagramUrl, mediaUrl, thumb||'', isVideo);
+}
+
+function fallbackImg(src){
+  if(!src) return;
+  const img = document.createElement('img');
+  img.src = src;
+  img.alt = 'Instagram Media';
+  mediaWrap.appendChild(img);
+}
+
+// HISTORY
+const histBtn = document.getElementById('histBtn');
+const histPanel = document.getElementById('histPanel');
+const histList = document.getElementById('histList');
+const histClear = document.getElementById('histClear');
+
+let currentInstagramUrl = '';
+
+function getHistory(){
+  try{ return JSON.parse(localStorage.getItem('mr_aabid_history')||'[]'); }
+  catch(e){ return []; }
+}
+function saveHistory(arr){
+  try{ localStorage.setItem('mr_aabid_history', JSON.stringify(arr.slice(0,50))); }
+  catch(e){}
+}
+function addToHistory(igUrl, mediaUrl, thumb, isVideo){
+  const arr = getHistory();
+  arr.unshift({ igUrl, mediaUrl, thumb, isVideo, time: Date.now() });
+  saveHistory(arr);
+  renderHistory();
+}
+function timeAgo(ts){
+  const diff = Math.floor((Date.now()-ts)/1000);
+  if(diff<60) return 'Just now';
+  if(diff<3600) return Math.floor(diff/60)+'m ago';
+  if(diff<86400) return Math.floor(diff/3600)+'h ago';
+  return Math.floor(diff/86400)+'d ago';
+}
+function renderHistory(){
+  const arr = getHistory();
+  if(arr.length===0){
+    histList.innerHTML='<div class="hist-empty">No history yet</div>';
+    return;
+  }
+  histList.innerHTML = arr.map((item,i)=>`
+    <div class="hist-item" data-i="${i}">
+      ${item.thumb
+        ? `<img class="hist-thumb" src="${item.thumb}" onerror="this.style.display='none'" loading="lazy">`
+        : `<div class="hist-thumb-placeholder"><svg viewBox="0 0 18 18" fill="none" stroke="#7b2ff7" stroke-width="1.8" width="22" height="22"><rect x="2" y="3" width="14" height="12" rx="2"/><path d="M7 8l4 2-4 2V8z" fill="#7b2ff7"/></svg></div>`
+      }
+      <div class="hist-info">
+        <div class="hist-type">${item.isVideo?'VIDEO':'IMAGE'}</div>
+        <div class="hist-url">${item.igUrl}</div>
+        <div class="hist-time">${timeAgo(item.time)}</div>
+      </div>
+      <div class="hist-actions">
+        <button class="hist-play-btn" data-i="${i}" title="Play">
+          <svg viewBox="0 0 16 16" fill="none" stroke="var(--neon)" stroke-width="1.8" stroke-linecap="round"><polygon points="4,2 14,8 4,14" fill="var(--neon)" stroke="none"/></svg>
+        </button>
+        <button class="hist-dl-btn2" data-i="${i}" title="Download">
+          <svg viewBox="0 0 16 16" fill="none" stroke="var(--neon2)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8M4 7l4 4 4-4"/><path d="M2 13h12"/></svg>
+        </button>
+      </div>
+    </div>
+  `).join('');
+
+  // Play buttons
+  histList.querySelectorAll('.hist-play-btn').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      const item = getHistory()[+btn.dataset.i];
+      if(!item) return;
+      playHistoryItem(item);
+    });
+  });
+  // Download buttons
+  histList.querySelectorAll('.hist-dl-btn2').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      const item = getHistory()[+btn.dataset.i];
+      if(!item) return;
+      triggerDownload(item.mediaUrl, item.isVideo);
+    });
+  });
+}
+
+function playHistoryItem(item){
+  currentMediaUrl = item.mediaUrl;
+  currentIsVideo = item.isVideo;
+  urlInput.value = item.igUrl;
+  mediaWrap.innerHTML='';
+  if(item.isVideo){
+    const vid = document.createElement('video');
+    vid.controls=true; vid.playsInline=true; vid.preload='metadata';
+    if(item.thumb) vid.poster=item.thumb;
+    const src = document.createElement('source');
+    src.src = item.mediaUrl;
+    vid.appendChild(src);
+    mediaWrap.appendChild(vid);
+    vid.play().catch(()=>{});
+  } else {
+    const img = document.createElement('img');
+    img.src = item.mediaUrl; img.alt='Instagram Media';
+    mediaWrap.appendChild(img);
+  }
+  resultArea.classList.add('active');
+  histPanel.classList.remove('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+histBtn.addEventListener('click',()=>{
+  const open = histPanel.classList.toggle('active');
+  if(open) renderHistory();
+});
+
+histClear.addEventListener('click',()=>{
+  localStorage.removeItem('mr_aabid_history');
+  renderHistory();
+});
+
+// DOWNLOAD
+async function triggerDownload(mediaUrl, isVideo){
+
+  const ts = Date.now();
+  const ext = isVideo ? 'mp4' : 'jpg';
+  const filename = `Mr_AABID_${ts}.${ext}`;
+
+  // Android interface se download
+  try {
+    if(window.AndroidInterface){
+      window.AndroidInterface.downloadMedia(mediaUrl, filename);
+    } else {
+      window.open(mediaUrl, '_blank');
+    }
+  } catch(e){
+    window.open(mediaUrl, '_blank');
+  }
+}
+
+dlBtn.addEventListener('click',()=>{
+  if(!currentMediaUrl) return;
+  addToHistory(currentInstagramUrl||urlInput.value.trim(), currentMediaUrl, '', currentIsVideo);
+  triggerDownload(currentMediaUrl, currentIsVideo);
+  // Show interstitial after download starts
+  setTimeout(()=>{
+    if(window.AndroidInterface) window.AndroidInterface.showInterstitialAd();
+  }, 1500);
+});
+
+// HD Rewarded Download button
+const hdBtn = document.getElementById('hdBtn');
+if(hdBtn){
+  hdBtn.addEventListener('click',()=>{
+    if(!currentMediaUrl) return;
+    if(window.AndroidInterface){
+      window.AndroidInterface.showRewardedAd(currentMediaUrl, currentIsVideo ? 'mp4' : 'jpg');
+    }
+  });
+}
+
+// Clear error on new input
+urlInput.addEventListener('input',clearError);
+
+})();
+</script>
+</body>
+</html>

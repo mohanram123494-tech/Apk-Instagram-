@@ -1,0 +1,2 @@
+-keep class com.mraabid.instadownloader.** { *; }
+-keep class com.google.android.gms.ads.** { *; }

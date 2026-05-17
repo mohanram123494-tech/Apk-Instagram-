@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.InstaDownloader" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">#060812</item>
+        <item name="colorPrimaryDark">#060812</item>
+        <item name="colorAccent">#00f5d4</item>
+        <item name="android:windowBackground">#060812</item>
+        <item name="android:statusBarColor">#060812</item>
+        <item name="android:navigationBarColor">#060812</item>
+    </style>
+</resources>
