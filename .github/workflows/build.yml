@@ -13,8 +13,12 @@ jobs:
         distribution: 'temurin'
     - uses: android-actions/setup-android@v3
     - run: yes | sdkmanager --licenses || true
-    - run: chmod +x gradlew
-    - run: ./gradlew assembleDebug
+    - name: Install Gradle
+      run: |
+        wget https://services.gradle.org/distributions/gradle-8.0-bin.zip
+        unzip gradle-8.0-bin.zip
+        export PATH=$PWD/gradle-8.0/bin:$PATH
+        gradle assembleDebug
     - uses: actions/upload-artifact@v4
       with:
         name: InstaDownloader-APK
